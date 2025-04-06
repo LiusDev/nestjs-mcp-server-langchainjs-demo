@@ -91,6 +91,49 @@ curl -X POST http://localhost:3001 -H "Content-Type: application/json" -d "{\"me
 
 The response will contain the current time in Vietnam, retrieved through the MCP server's time context function.
 
+## Connecting to Multiple MCP Servers
+
+The backend can connect to multiple MCP servers simultaneously. To add additional servers, modify the `McpClientModule.register` configuration in `apps/mcp-backend/src/mcp-backend.module.ts`:
+
+```typescript
+McpClientModule.register({
+  throwOnLoadError: true,
+  prefixToolNameWithServerName: false,  // Set to true to prefix tool names with server names
+  additionalToolNamePrefix: '',
+  mcpServers: {
+    myServer: {
+      transport: 'sse',
+      url: 'http://localhost:3000/sse',
+      useNodeEventSource: true,
+      reconnect: {
+        enabled: true,
+        maxAttempts: 5,
+        delayMs: 2000,
+      },
+    },
+    // Add additional servers here
+    anotherServer: {
+      transport: 'sse',
+      url: 'http://localhost:4000/sse',  // Different port for another server
+      useNodeEventSource: true,
+      reconnect: {
+        enabled: true,
+        maxAttempts: 5,
+        delayMs: 2000,
+      },
+    },
+  },
+}),
+```
+
+When connecting to multiple servers:
+
+- Consider setting `prefixToolNameWithServerName: true` to avoid tool name conflicts
+- Ensure each server has a unique key in the `mcpServers` object
+- Make sure each server is running on a different port
+
+The MCP client will automatically fetch tools from all configured servers and make them available to the LLM.
+
 ## Architecture
 
 - **mcp-server**: Exposes tools via the Model Context Protocol, including a function to get the current time
