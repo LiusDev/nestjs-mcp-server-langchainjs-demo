@@ -47,7 +47,7 @@ export class McpClientService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async getTools() {
-    return await this.client.getTools();
+  async getTools(...servers: string[]) {
+    return await this.client.getTools(...servers);
   }
 }
